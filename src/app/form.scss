@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.form-base {
+  @apply block bg-gray-100 
+        border-2 border-gray-600 
+        w-full rounded 
+        focus:bg-white focus:outline-none focus:border-red-500;
+}
+
+.form-display-label {
+  @apply text-base;
+}
+
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
