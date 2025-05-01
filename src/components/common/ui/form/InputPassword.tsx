@@ -1,16 +1,14 @@
 import { memo, useState } from 'react';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
-import { FieldValues, Path } from 'react-hook-form';
-import BaseInput, { BaseInputProps } from './BaseInput';
-import { ScreenInfo, ScreenInfoState } from '@/slices/screen-info-slices';
-import { useSelector } from 'react-redux';
+import { ControllerRenderProps, FieldValues, Path } from 'react-hook-form';
+import BaseInput, { InputProps } from './BaseInput';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 /**
  * パスワード入力Props
  */
-export type PasswordProps<T extends FieldValues> = BaseInputProps<T> & {
+export type PasswordProps<T extends FieldValues> = InputProps<T> & {
   /** パスワード表示/非表示可否
    */
   canPasswordShow?: boolean;
@@ -23,13 +21,9 @@ export type PasswordProps<T extends FieldValues> = BaseInputProps<T> & {
  * @returns パスワード入力テキストボックス
  */
 const InputPassword = <T extends FieldValues>(props: PasswordProps<T>) => {
-  const screenInfo: ScreenInfo = useSelector((state: ScreenInfoState) => state.screenInfo);
   const [showPassword, setShowPassword] = useState(false);
 
-  const { name, listName, index, canPasswordShow, ...restProps } = props;
-
-  // 項目名
-  const itemName = listName ? `${listName}.${index}.${name}` : name;
+  const { canPasswordShow, ...restProps } = props;
 
   // ラベル用クラス
   const labelClassName = 'form-display-label ' + (props.labelClassName ? props.labelClassName : '');
@@ -42,19 +36,10 @@ const InputPassword = <T extends FieldValues>(props: PasswordProps<T>) => {
   };
 
   /**
-   * 入力値を取得する
-   * @returns 項目値
-   */
-  const getValue = (): String => {
-    return props.getValues(itemName as Path<T>);
-  };
-
-  /**
    * 入力値(マスク)を取得する
    * @returns 項目値
    */
-  const getMaskValue = (): String => {
-    const value = props.getValues(itemName as Path<T>);
+  const getMaskValue = (value: string): String => {
     let ret = '';
     for (let i = 0; i < value.length; i++) {
       ret += '*';
@@ -63,7 +48,7 @@ const InputPassword = <T extends FieldValues>(props: PasswordProps<T>) => {
   };
 
   /** パスワード表示/非表示切り替え */
-  const endAdornment = props.canPasswordShow ? (
+  const endAdornment = canPasswordShow ? (
     <InputAdornment position="end">
       <IconButton
         aria-label={showPassword ? 'hide the password' : 'display the password'}
@@ -76,19 +61,11 @@ const InputPassword = <T extends FieldValues>(props: PasswordProps<T>) => {
   ) : undefined;
 
   return (
-    <>
-      {screenInfo.status === 'input' && (
-        <BaseInput
-          type={showPassword ? 'text' : 'password'}
-          name={name}
-          listName={listName}
-          index={index}
-          {...restProps}
-          endAdornment={endAdornment}
-        />
+    <BaseInput type={showPassword ? 'text' : 'password'} {...restProps} endAdornment={endAdornment}>
+      {(field: ControllerRenderProps<T, Path<T>>) => (
+        <span className={labelClassName}>{getMaskValue(field.value)}</span>
       )}
-      {screenInfo.status !== 'input' && <span className={labelClassName}>{getMaskValue()}</span>}
-    </>
+    </BaseInput>
   );
 };
 

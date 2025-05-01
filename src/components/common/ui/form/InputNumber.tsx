@@ -1,17 +1,24 @@
-import { memo, useRef, useState } from 'react';
-import IconButton from '@mui/material/IconButton';
-import InputAdornment from '@mui/material/InputAdornment';
-import { FieldValues, Path } from 'react-hook-form';
-import BaseInput, { BaseInputProps } from './BaseInput';
-import { ScreenInfo, ScreenInfoState } from '@/slices/screen-info-slices';
+import { memo, useEffect, useRef, useState } from 'react';
+import {
+  Controller,
+  ControllerRenderProps,
+  FieldValues,
+  Path,
+  PathValue,
+  useController,
+  useWatch,
+} from 'react-hook-form';
+import BaseInput from './BaseInput';
+import { canInput, ScreenInfo, ScreenInfoState } from '@/slices/screen-info-slices';
 import { useSelector } from 'react-redux';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { Button, TextField } from '@mui/material';
+import { TextField } from '@mui/material';
+import { BaseProps, getItemName } from './common';
 
 /**
  * 数値入力Props
  */
-export type NumberProps<T extends FieldValues> = BaseInputProps<T> & {
+export type NumberProps<T extends FieldValues> = BaseProps<T> & {
+  /** カンマ編集フラグ */
   isFormat?: boolean;
 };
 
@@ -27,49 +34,40 @@ const InputNumber = <T extends FieldValues>(props: NumberProps<T>) => {
   const displayRef = useRef<HTMLInputElement>(null);
   const [isFocus, setIsFocus] = useState(false);
 
-  const {
-    name,
-    listName,
-    index,
-    labelClassName,
-    getValues,
-    register,
-    errors,
-    isFormat,
-    ...restProps
-  } = props;
-
-  // 項目名
-  const itemName = (listName ? `${listName}.${index}.${name}` : name) as Path<T>;
-  const [displayValue, setDisplayValue] = useState(getValues(itemName));
+  const { labelClassName, isFormat, ...restProps } = props;
 
   // ラベル用クラス
   const labelClass = 'form-display-label ' + (labelClassName ? labelClassName : '');
 
+  const itemName = getItemName(props.name, props.listName, props.index);
+
+  const {
+    field,
+    fieldState: { invalid, error },
+  } = useController({
+    name: itemName,
+    control: props.control,
+  });
+
   /**
+   * TODO field.valueがnumberという値になってしまう　どこでなってる？
+   *
    * 入力値を取得する
    * @returns 項目値
    */
-  const getValue = (): String => {
-    const value = getValues(itemName);
-    if (isFormat) {
-      //return value ? value.replace(/,/g, '') : '';
-      if (value) {
-        const val = Number(value);
-        return val.toLocaleString();
-      }
+  const getFormatValue = (): string | number | null => {
+    console.log(itemName + '[' + field.value + ']' + typeof field.value);
+    if (isFormat && field.value && !isNaN(Number(field.value))) {
+      return Number(field.value).toLocaleString();
     }
-    return value;
+    return field.value ?? null;
   };
 
   const handleBlur = (e: any) => {
-    register(itemName).onChange(e);
-    setDisplayValue(getValues(itemName));
     setIsFocus(false);
   };
 
   const handleFocus = (e: any) => {
-    console.log('===========' + getValues(itemName));
     setIsFocus(true);
     displayRef.current?.blur();
     setTimeout(() => {
@@ -79,40 +77,27 @@ const InputNumber = <T extends FieldValues>(props: NumberProps<T>) => {
 
   return (
     <>
-      {screenInfo.status === 'input' && (
+      {canInput(screenInfo) && !isFocus ? (
         <>
-          {isFocus && (
-            <>
-              <BaseInput
-                type="number"
-                name={name}
-                listName={listName}
-                index={index}
-                inputRef={inputRef}
-                register={register}
-                errors={errors}
-                getValues={getValues}
-                onBlur={handleBlur}
-                {...restProps}
-              />
-              focus
-            </>
-          )}
-          {!isFocus && (
-            <>
-              <TextField
-                inputRef={displayRef}
-                type="text"
-                onFocus={handleFocus}
-                value={displayValue}
-                {...restProps}
-              />
-              blur
-            </>
-          )}
+          <TextField
+            inputRef={displayRef}
+            type="text"
+            onFocus={handleFocus}
+            value={getFormatValue()}
+            error={invalid}
+            helperText={error?.message}
+            {...restProps}
+          />
+        </>
+      ) : (
+        <>
+          <BaseInput type="number" inputRef={inputRef} onBlur={handleBlur} {...restProps}>
+            {(field: ControllerRenderProps<T, Path<T>>) => (
+              <span className={labelClass}>{getFormatValue()}</span>
+            )}
+          </BaseInput>
         </>
       )}
-      {screenInfo.status !== 'input' && <span className={labelClass}>{getValue()}</span>}
     </>
   );
 };

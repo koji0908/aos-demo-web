@@ -2,6 +2,7 @@ import { Container, Box, Stack, TextField, MenuItem, Card } from '@mui/material'
 import Grid from '@mui/material/Grid2';
 import { useForm } from 'react-hook-form';
 import MuiForm from './MuiForm';
+import { Suspense } from 'react';
 
 export default function UiSample() {
   return (
@@ -95,7 +96,9 @@ export default function UiSample() {
         </div>
         <hr />
         <div>
-          <MuiForm />
+          <Suspense>
+            <MuiForm />
+          </Suspense>
         </div>
         <hr />
         <div>

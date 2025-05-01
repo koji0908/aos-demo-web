@@ -9,6 +9,12 @@ export interface ScreenInfoState {
   screenInfo: ScreenInfo;
 }
 
+export const canInput = (screenInfo: ScreenInfo): boolean => {
+  return (
+    (screenInfo.mode === 'regist' || screenInfo.mode === 'update') && screenInfo.status === 'input'
+  );
+};
+
 const doSetScreenStatusInput = (state: any) => {
   state.status = 'input';
 };
@@ -64,6 +70,7 @@ export const {
   setScreenStatusConfirm,
   setScreenStatusFinish,
   setScreenModeNone,
+  setScreenModeRegist,
   setScreenModeUpdate,
   setScreenModeDelete,
   setScreenModeReference,
