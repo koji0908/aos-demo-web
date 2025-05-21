@@ -1,4 +1,4 @@
-import { memo, ReactNode } from 'react';
+import { ChangeEvent, memo, ReactNode } from 'react';
 import { TextField } from '@mui/material';
 import { Controller, ControllerRenderProps, FieldValues, Path } from 'react-hook-form';
 import { BaseProps, getItemName } from './common';
@@ -70,16 +70,41 @@ const BaseInput = <T extends FieldValues>(props: BaseInputProps<T>) => {
     type,
     readOnly,
     disabled,
-    onChange,
     startAdornment,
     endAdornment,
     control,
     children,
+    onChange,
+    onFocus,
+    onBlur,
     ...restProps
   } = props;
 
   // 項目名
   const itemName = getItemName(name, listName, index);
+
+  const handleChange = (
+    field: ControllerRenderProps<T, Path<T>>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    console.log('BaseInput.onChange');
+    field.onChange(e);
+    onChange && onChange(e);
+  };
+
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    console.log('BaseInput.onFocus');
+    onFocus && onFocus(e);
+  };
+
+  const handleBlur = (
+    field: ControllerRenderProps<T, Path<T>>,
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    console.log('BaseInput.onBlur');
+    field.onBlur();
+    onBlur && onBlur(e);
+  };
 
   return (
     <Controller
@@ -104,6 +129,9 @@ const BaseInput = <T extends FieldValues>(props: BaseInputProps<T>) => {
               {...field}
               error={fieldState.invalid}
               helperText={fieldState.error?.message}
+              onChange={(e) => handleChange(field, e)}
+              onFocus={(e) => handleFocus(e)}
+              onBlur={(e) => handleBlur(field, e)}
               {...restProps}
             />
           ) : (

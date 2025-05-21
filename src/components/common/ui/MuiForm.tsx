@@ -41,6 +41,8 @@ import DateTimePicker from './form/DateTimePicker';
 import TimePicker from './form/TimePicker';
 import dayjs from 'dayjs';
 
+// TODO イベントハンドラの動作確認
+// TODO フォームのJSON送信
 export default memo(function MuiForm() {
   const screenInfo: ScreenInfo = useSelector((state: ScreenInfoState) => state.screenInfo);
 
@@ -53,7 +55,7 @@ export default memo(function MuiForm() {
     password1: z.string().min(1).max(10),
     password2: z.string().min(1).max(10),
     tel: z.string().min(1),
-    num1: z.number(),
+    num1: z.string().min(1),
     num2: z.number(),
     check1: z.string().min(1),
     check2: z.array(z.string()).min(1),
@@ -83,7 +85,7 @@ export default memo(function MuiForm() {
     password1: '',
     password2: '',
     tel: '09000000000',
-    num1: 0,
+    num1: '0',
     num2: 0,
     check1: '0',
     check2: [],
@@ -205,6 +207,38 @@ export default memo(function MuiForm() {
         <div>{screenInfo.status}</div>
         <div className="grid grid-cols-1 sm:grid-cols-2">
           <div className="p-2">
+            <Card
+              title="イベントハンドラテスト"
+              subheader={getValues('name1')}
+              action={PAGE_STATUS_BUTTONS}
+            >
+              <Select
+                label="住所"
+                name="select1"
+                control={control}
+                required={true}
+                items={[
+                  { label: '千葉', value: '1' },
+                  { label: '東京', value: '2' },
+                  { label: '埼玉', value: '3' },
+                  { label: '茨城', value: '4' },
+                  { label: '栃木', value: '5' },
+                  { label: '北海道はでっかいどう', value: '6' },
+                ]}
+                onFocus={() =>
+                  console.log('イベントハンドラテスト(onFocus):[' + getValues('select1') + ']')
+                }
+                onBlur={() =>
+                  console.log('イベントハンドラテスト(onBlur):[' + getValues('select1') + ']')
+                }
+                onChange={() =>
+                  console.log('イベントハンドラテスト(onChange):[' + getValues('select1') + ']')
+                }
+              />
+            </Card>
+          </div>
+
+          <div className="p-2">
             <Card title="テキストボックス" subheader="基本" action={PAGE_STATUS_BUTTONS}>
               <InputText name="name1" type="text" label="名前" control={control} />
             </Card>
@@ -244,10 +278,6 @@ export default memo(function MuiForm() {
               />
             </Card>
           </div>
-          {
-            // TODO InputNumberのバリデーションがおかしい　数値入力してもエラーになる
-            // TODO バリデーションエラーになったときフォーカスインしないとエラーメッセージがでない
-          }
           <div className="p-2">
             <Card title="数値入力" subheader="カンマ編集なし" action={PAGE_STATUS_BUTTONS}>
               <InputNumber name="num1" label="数値" control={control} />
@@ -256,7 +286,7 @@ export default memo(function MuiForm() {
           <div className="p-2">
             <Card title="数値入力" subheader="カンマ編集あり" action={PAGE_STATUS_BUTTONS}>
               <InputNumber name="num2" label="数値" isFormat={true} control={control} />[
-              {getValues('num2')} {typeof getValues('num2')}]
+              {getValues('num2')}
             </Card>
           </div>
 

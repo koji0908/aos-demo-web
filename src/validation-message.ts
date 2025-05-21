@@ -7,11 +7,11 @@ export const validationMessage: zod.ZodErrorMap = (issue, ctx) => {
     case zod.ZodIssueCode.invalid_type:
       if (
         issue.received === zod.ZodParsedType.undefined ||
-        issue.received === zod.ZodParsedType.null
+        issue.received === zod.ZodParsedType.null ||
+        issue.expected === zod.ZodParsedType.number
       ) {
         return { message: '必須項目です。' };
       } else {
-        console.log(issue.path + ':' + issue.expected + ':' + issue.received + ':');
         return { message: '値に誤りがあります。' };
       }
     case zod.ZodIssueCode.too_big:

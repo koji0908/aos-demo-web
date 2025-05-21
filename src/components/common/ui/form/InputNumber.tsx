@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, memo, useEffect, useRef, useState } from 'react';
 import {
   Controller,
   ControllerRenderProps,
@@ -20,6 +20,12 @@ import { BaseProps, getItemName } from './common';
 export type NumberProps<T extends FieldValues> = BaseProps<T> & {
   /** カンマ編集フラグ */
   isFormat?: boolean;
+  /** onBlurイベントハンドラ */
+  onBlur?: React.FocusEventHandler<HTMLInputElement | HTMLTextAreaElement>;
+  /** onChangeイベントハンドラ */
+  onChange?: React.ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>;
+  /** onFocusイベントハンドラ */
+  onFocus?: React.FocusEventHandler<HTMLInputElement | HTMLTextAreaElement>;
 };
 
 /**
@@ -34,7 +40,7 @@ const InputNumber = <T extends FieldValues>(props: NumberProps<T>) => {
   const displayRef = useRef<HTMLInputElement>(null);
   const [isFocus, setIsFocus] = useState(false);
 
-  const { labelClassName, isFormat, ...restProps } = props;
+  const { labelClassName, isFormat, onBlur, onChange, onFocus, ...restProps } = props;
 
   // ラベル用クラス
   const labelClass = 'form-display-label ' + (labelClassName ? labelClassName : '');
@@ -50,29 +56,43 @@ const InputNumber = <T extends FieldValues>(props: NumberProps<T>) => {
   });
 
   /**
-   * TODO field.valueがnumberという値になってしまう　どこでなってる？
-   *
    * 入力値を取得する
    * @returns 項目値
    */
   const getFormatValue = (): string | number | null => {
-    console.log(itemName + '[' + field.value + ']' + typeof field.value);
     if (isFormat && field.value && !isNaN(Number(field.value))) {
       return Number(field.value).toLocaleString();
     }
     return field.value ?? null;
   };
 
-  const handleBlur = (e: any) => {
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setIsFocus(false);
+    onBlur && onBlur(e);
   };
 
-  const handleFocus = (e: any) => {
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setIsFocus(true);
+    onFocus && onFocus(e);
     displayRef.current?.blur();
     setTimeout(() => {
       inputRef.current?.focus();
     }, 100);
+  };
+
+  const parseNumber = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): number | string => {
+    if (!isFormat) {
+      return e.target.value ?? '';
+    }
+    return e.target.value ? Number(e.target.value) : '';
+  };
+
+  const handleChange = (
+    field: ControllerRenderProps<T, Path<T>>,
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    field.onChange(parseNumber(e));
+    onChange && onChange(e);
   };
 
   return (
@@ -91,7 +111,13 @@ const InputNumber = <T extends FieldValues>(props: NumberProps<T>) => {
         </>
       ) : (
         <>
-          <BaseInput type="number" inputRef={inputRef} onBlur={handleBlur} {...restProps}>
+          <BaseInput
+            type="number"
+            inputRef={inputRef}
+            onBlur={handleBlur}
+            onChange={(e) => handleChange(field, e)}
+            {...restProps}
+          >
             {(field: ControllerRenderProps<T, Path<T>>) => (
               <span className={labelClass}>{getFormatValue()}</span>
             )}

@@ -12,7 +12,15 @@ import {
 } from '@mui/material';
 import React, { Fragment, memo, useState } from 'react';
 import { BaseProps, getErrorMessage, getItemName, hasError, LabelValue } from './common';
-import { Control, Controller, FieldValues, Path, PathValue, useWatch } from 'react-hook-form';
+import {
+  Control,
+  Controller,
+  ControllerRenderProps,
+  FieldValues,
+  Path,
+  PathValue,
+  useWatch,
+} from 'react-hook-form';
 import { useSelector } from 'react-redux';
 
 /**
@@ -25,6 +33,12 @@ export type SelectProps<T extends FieldValues> = BaseProps<T> & {
   emptyLabel?: string;
   /** control */
   control: Control<T>;
+  /** onBlurイベントハンドラ */
+  onBlur?: React.FocusEventHandler<HTMLInputElement | HTMLTextAreaElement>;
+  /** onChangeイベントハンドラ */
+  onChange?: SelectChangeEvent<PathValue<T, Path<T>>>;
+  /** onFocusイベントハンドラ */
+  onFocus?: React.FocusEventHandler<HTMLInputElement | HTMLTextAreaElement>;
 };
 
 const Select = <T extends FieldValues>(props: SelectProps<T>) => {
@@ -40,6 +54,9 @@ const Select = <T extends FieldValues>(props: SelectProps<T>) => {
     margin,
     emptyLabel,
     items,
+    onChange,
+    onFocus,
+    onBlur,
     ...restProps
   } = props;
 
@@ -51,6 +68,29 @@ const Select = <T extends FieldValues>(props: SelectProps<T>) => {
 
   // ラベル用クラス
   const labelClass = 'form-display-label ' + (props.labelClassName ? props.labelClassName : '');
+
+  const handleChange = (
+    field: ControllerRenderProps<T, Path<T>>,
+    e: SelectChangeEvent<PathValue<T, Path<T>>>
+  ) => {
+    console.log('Select.onChange');
+    field.onChange(e);
+    onChange && onChange(e);
+  };
+
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    console.log('Select.onFocus');
+    onFocus && onFocus(e);
+  };
+
+  const handleBlur = (
+    field: ControllerRenderProps<T, Path<T>>,
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    console.log('Select.onBlur');
+    field.onBlur();
+    onBlur && onBlur(e);
+  };
 
   /**
    * ラベルを取得する
@@ -83,6 +123,9 @@ const Select = <T extends FieldValues>(props: SelectProps<T>) => {
                     const item = items.find((item) => item.value === selected);
                     return item ? item.label : '';
                   }}
+                  onChange={(e) => handleChange(field, e)}
+                  onFocus={(e) => handleFocus(e)}
+                  onBlur={(e) => handleBlur(field, e)}
                 >
                   {!props.required && (
                     <MenuItem value="">{emptyLabel ? emptyLabel : '　'}</MenuItem>
