@@ -36,7 +36,7 @@ export type SelectProps<T extends FieldValues> = BaseProps<T> & {
   /** onBlurイベントハンドラ */
   onBlur?: React.FocusEventHandler<HTMLInputElement | HTMLTextAreaElement>;
   /** onChangeイベントハンドラ */
-  onChange?: React.ChangeEventHandler<React.ChangeEvent<PathValue<T, Path<T>>>>;
+  onChange?: React.ChangeEventHandler<SelectChangeEvent<PathValue<T, Path<T>>>>;
   /** onFocusイベントハンドラ */
   onFocus?: React.FocusEventHandler<HTMLInputElement | HTMLTextAreaElement>;
 };
