@@ -7,10 +7,18 @@ import {
   ListItemText,
   MenuItem,
   Select as MuiSelect,
+  SelectChangeEvent,
 } from '@mui/material';
-import React, { memo, ReactNode } from 'react';
+import React, { memo, ReactNode, useRef } from 'react';
 import { getItemName, LabelValue } from './common';
-import { Controller, FieldValues, Path, useWatch } from 'react-hook-form';
+import {
+  Controller,
+  ControllerRenderProps,
+  FieldValues,
+  Path,
+  PathValue,
+  useWatch,
+} from 'react-hook-form';
 import { useSelector } from 'react-redux';
 import { SelectProps } from './Select';
 
@@ -32,6 +40,9 @@ const MultiSelect = <T extends FieldValues>(props: MultiSelectProps<T>) => {
     margin,
     emptyLabel,
     items,
+    onChange,
+    onFocus,
+    onBlur,
     ...restProps
   } = props;
 
@@ -43,6 +54,26 @@ const MultiSelect = <T extends FieldValues>(props: MultiSelectProps<T>) => {
 
   // ラベル用クラス
   const labelClass = 'form-display-label ' + (props.labelClassName ? props.labelClassName : '');
+
+  const handleChange = (
+    field: ControllerRenderProps<T, Path<T>>,
+    e: SelectChangeEvent<PathValue<T, Path<T>>>
+  ) => {
+    field.onChange(e);
+    onChange && onChange(e);
+  };
+
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    onFocus && onFocus(e);
+  };
+
+  const handleBlur = (
+    field: ControllerRenderProps<T, Path<T>>,
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    field.onBlur();
+    onBlur && onBlur(e);
+  };
 
   /**
    * ラベルを取得する
@@ -73,6 +104,9 @@ const MultiSelect = <T extends FieldValues>(props: MultiSelectProps<T>) => {
                   multiple
                   value={field.value}
                   displayEmpty={true}
+                  onChange={(e) => handleChange(field, e)}
+                  onFocus={(e) => handleFocus(e)}
+                  onBlur={(e) => handleBlur(field, e)}
                   renderValue={(selected) => {
                     if (!selected || selected.length == 0) {
                       return '選択してください';

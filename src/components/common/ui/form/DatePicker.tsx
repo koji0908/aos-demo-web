@@ -13,17 +13,29 @@ import { PickersActionBarAction } from '@mui/x-date-pickers/PickersActionBar';
 import {
   DateTimeValidationError,
   DateValidationError,
+  PickerChangeHandlerContext,
   TimeValidationError,
 } from '@mui/x-date-pickers/models';
 import DatePickerProvider from './DatePickerProvider';
 
-export type DatePickerProps<T extends FieldValues> = BaseProps<T> & {
+export type DatePickerProps<
+  T extends FieldValues,
+  TValue extends dayjs.Dayjs,
+  TError
+> = BaseProps<T> & {
   format?: 'YYYY/MM/DD' | 'YYYY年MM月DD日' | 'YYYY-MM-DD' | 'YYYYMMDD';
   minDate?: Date;
   maxDate?: Date;
+  onChange?: (value: TValue, context: PickerChangeHandlerContext<TError>) => void;
 };
 
-const DatePicker = <T extends FieldValues>(props: DatePickerProps<T>) => {
+const DatePicker = <
+  T extends FieldValues,
+  TValue extends dayjs.Dayjs,
+  TError extends DateValidationError
+>(
+  props: DatePickerProps<T, TValue, TError>
+) => {
   const {
     name,
     listName,
@@ -34,11 +46,24 @@ const DatePicker = <T extends FieldValues>(props: DatePickerProps<T>) => {
     minDate,
     maxDate,
     margin,
+    onChange,
     ...restProps
   } = props;
 
   const actions: Array<PickersActionBarAction> = ['cancel'];
   !props.required && actions.unshift('clear');
+
+  const handleChange = (
+    field: ControllerRenderProps<T, Path<T>>,
+    newValue: TValue,
+    error: PickerChangeHandlerContext<TError>
+  ) => {
+    console.log('DatePicker.onChange');
+    0;
+    const formatted = newValue ? dayjs(newValue).format('YYYY-MM-DD') : '';
+    field.onChange(formatted);
+    onChange && onChange(newValue, error);
+  };
 
   return (
     <DatePickerProvider
@@ -62,9 +87,8 @@ const DatePicker = <T extends FieldValues>(props: DatePickerProps<T>) => {
           format={format ?? `YYYY/MM/DD`}
           value={field?.value?.length > 0 ? dayjs(field.value) : null}
           onError={(newError) => setError(newError)}
-          onChange={(newValue) => {
-            const formatted = newValue ? dayjs(newValue).format('YYYY-MM-DD') : '';
-            field.onChange(formatted);
+          onChange={(newValue, error) => {
+            handleChange(field, newValue, error);
           }}
           slotProps={{
             calendarHeader: { format: 'YYYY年MM月' },

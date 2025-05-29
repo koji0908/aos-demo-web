@@ -212,27 +212,13 @@ export default memo(function MuiForm() {
               subheader={getValues('name1')}
               action={PAGE_STATUS_BUTTONS}
             >
-              <Select
-                label="住所"
-                name="select1"
+              <DatePicker
+                label="日付を選択"
+                name="date"
                 control={control}
-                required={true}
-                items={[
-                  { label: '千葉', value: '1' },
-                  { label: '東京', value: '2' },
-                  { label: '埼玉', value: '3' },
-                  { label: '茨城', value: '4' },
-                  { label: '栃木', value: '5' },
-                  { label: '北海道はでっかいどう', value: '6' },
-                ]}
-                onFocus={() =>
-                  console.log('イベントハンドラテスト(onFocus):[' + getValues('select1') + ']')
-                }
-                onBlur={() =>
-                  console.log('イベントハンドラテスト(onBlur):[' + getValues('select1') + ']')
-                }
+                required={false}
                 onChange={() =>
-                  console.log('イベントハンドラテスト(onChange):[' + getValues('select1') + ']')
+                  console.log('イベントハンドラテスト(onChange):[' + getValues('date') + ']')
                 }
               />
             </Card>
@@ -396,7 +382,6 @@ export default memo(function MuiForm() {
           <div className="p-2">
             <Card title="日付" action={PAGE_STATUS_BUTTONS}>
               <DatePicker label="日付を選択" name="date" control={control} required={false} />
-              {getValues('date')}
             </Card>
           </div>
           <div className="p-2">
@@ -407,7 +392,6 @@ export default memo(function MuiForm() {
                 control={control}
                 required={false}
               />
-              {getValues('yearMonth')}
             </Card>
           </div>
           <div className="p-2">
@@ -420,13 +404,11 @@ export default memo(function MuiForm() {
                 minDate={new Date(2025, 2, 1)}
                 maxDate={new Date(2025, 2, 20)}
               />
-              {getValues('dateTime')}
             </Card>
           </div>
           <div className="p-2">
             <Card title="時刻" action={PAGE_STATUS_BUTTONS}>
               <TimePicker label="時刻を選択" name="time" control={control} required={false} />
-              [[[{getValues('time')}]]]
             </Card>
           </div>
         </div>

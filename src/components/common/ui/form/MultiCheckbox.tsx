@@ -7,7 +7,7 @@ import {
   FormLabel,
   Checkbox as MuiCheckbox,
 } from '@mui/material';
-import { Controller, FieldValues, Path, useWatch } from 'react-hook-form';
+import { Controller, ControllerRenderProps, FieldValues, Path, useWatch } from 'react-hook-form';
 import { useSelector } from 'react-redux';
 import { getItemName, LabelValue } from './common';
 import React, { Fragment, memo } from 'react';
@@ -26,6 +26,8 @@ const MultiCheckbox = <T extends FieldValues>(props: CheckboxProps<T>) => {
     checks,
     vertical,
     onChange,
+    onFocus,
+    onBlur,
     ...restProps
   } = props;
 
@@ -37,6 +39,33 @@ const MultiCheckbox = <T extends FieldValues>(props: CheckboxProps<T>) => {
 
   // ラベル用クラス
   const labelClass = 'form-display-label ' + (props.labelClassName ? props.labelClassName : '');
+
+  const handleChange = (
+    field: ControllerRenderProps<T, Path<T>>,
+    check: LabelValue,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const checked = e.target.checked;
+    if (checked) {
+      field.onChange([...field.value, check.value]);
+    } else {
+      field.onChange(field.value.filter((v: string) => v !== check.value));
+    }
+
+    onChange && onChange(e);
+  };
+
+  const handleFocus = (e: React.FocusEvent<HTMLButtonElement>) => {
+    onFocus && onFocus(e);
+  };
+
+  const handleBlur = (
+    field: ControllerRenderProps<T, Path<T>>,
+    e: React.FocusEvent<HTMLButtonElement>
+  ) => {
+    field.onBlur();
+    onBlur && onBlur(e);
+  };
 
   /**
    * 入力値を取得する
@@ -68,14 +97,11 @@ const MultiCheckbox = <T extends FieldValues>(props: CheckboxProps<T>) => {
                             value={check.value}
                             checked={field.value?.includes(check.value)}
                             onChange={(e) => {
-                              const checked = e.target.checked;
-                              if (checked) {
-                                field.onChange([...field.value, check.value]);
-                              } else {
-                                field.onChange(
-                                  field.value.filter((v: string) => v !== check.value)
-                                );
-                              }
+                              handleChange(field, check, e);
+                            }}
+                            onFocus={handleFocus}
+                            onBlur={(e) => {
+                              handleBlur(field, e);
                             }}
                           />
                         }

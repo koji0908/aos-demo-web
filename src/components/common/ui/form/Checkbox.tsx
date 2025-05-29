@@ -7,7 +7,14 @@ import {
   FormLabel,
   Checkbox as MuiCheckbox,
 } from '@mui/material';
-import { Control, Controller, FieldValues, Path, useWatch } from 'react-hook-form';
+import {
+  Control,
+  Controller,
+  ControllerRenderProps,
+  FieldValues,
+  Path,
+  useWatch,
+} from 'react-hook-form';
 import { useSelector } from 'react-redux';
 import { BaseProps, getItemName, LabelValue } from './common';
 import React, { Fragment, memo, ReactNode } from 'react';
@@ -24,6 +31,10 @@ export type CheckboxProps<T extends FieldValues> = BaseProps<T> & {
   control: Control<T>;
   /** onChangeイベントハンドラ */
   onChange?: React.ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>;
+  /** onBlurイベントハンドラ */
+  onBlur?: React.FocusEventHandler<HTMLButtonElement>;
+  /** onFocusイベントハンドラ */
+  onFocus?: React.FocusEventHandler<HTMLButtonElement>;
 };
 
 const Checkbox = <T extends FieldValues>(props: CheckboxProps<T>) => {
@@ -39,6 +50,8 @@ const Checkbox = <T extends FieldValues>(props: CheckboxProps<T>) => {
     checks,
     vertical,
     onChange,
+    onFocus,
+    onBlur,
     ...restProps
   } = props;
 
@@ -50,6 +63,32 @@ const Checkbox = <T extends FieldValues>(props: CheckboxProps<T>) => {
 
   // ラベル用クラス
   const labelClass = 'form-display-label ' + (props.labelClassName ? props.labelClassName : '');
+
+  const handleChange = (
+    field: ControllerRenderProps<T, Path<T>>,
+    check: LabelValue,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const checked = e.target.checked;
+    if (checked) {
+      field.onChange(check.value);
+    } else {
+      field.onChange('');
+    }
+    onChange && onChange(e);
+  };
+
+  const handleFocus = (e: React.FocusEvent<HTMLButtonElement>) => {
+    onFocus && onFocus(e);
+  };
+
+  const handleBlur = (
+    field: ControllerRenderProps<T, Path<T>>,
+    e: React.FocusEvent<HTMLButtonElement>
+  ) => {
+    field.onBlur();
+    onBlur && onBlur(e);
+  };
 
   /**
    * ラベルを取得する
@@ -80,12 +119,11 @@ const Checkbox = <T extends FieldValues>(props: CheckboxProps<T>) => {
                             value={check.value}
                             checked={field.value === check.value}
                             onChange={(e) => {
-                              const checked = e.target.checked;
-                              if (checked) {
-                                field.onChange(check.value);
-                              } else {
-                                field.onChange('');
-                              }
+                              handleChange(field, check, e);
+                            }}
+                            onFocus={handleFocus}
+                            onBlur={(e) => {
+                              handleBlur(field, e);
                             }}
                           />
                         }

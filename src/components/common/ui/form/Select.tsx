@@ -36,7 +36,9 @@ export type SelectProps<T extends FieldValues> = BaseProps<T> & {
   /** onBlurイベントハンドラ */
   onBlur?: React.FocusEventHandler<HTMLInputElement | HTMLTextAreaElement>;
   /** onChangeイベントハンドラ */
-  onChange?: React.ChangeEventHandler<SelectChangeEvent<PathValue<T, Path<T>>>>;
+  onChange?: any;
+  // TODO こうしたいけどコンパイルエラーが解消できない
+  // onChange?: React.ChangeEventHandler<SelectChangeEvent<PathValue<T, Path<T>>>>;
   /** onFocusイベントハンドラ */
   onFocus?: React.FocusEventHandler<HTMLInputElement | HTMLTextAreaElement>;
 };
@@ -73,13 +75,11 @@ const Select = <T extends FieldValues>(props: SelectProps<T>) => {
     field: ControllerRenderProps<T, Path<T>>,
     e: SelectChangeEvent<PathValue<T, Path<T>>>
   ) => {
-    console.log('Select.onChange');
     field.onChange(e);
     onChange && onChange(e);
   };
 
   const handleFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    console.log('Select.onFocus');
     onFocus && onFocus(e);
   };
 
@@ -87,7 +87,6 @@ const Select = <T extends FieldValues>(props: SelectProps<T>) => {
     field: ControllerRenderProps<T, Path<T>>,
     e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    console.log('Select.onBlur');
     field.onBlur();
     onBlur && onBlur(e);
   };
